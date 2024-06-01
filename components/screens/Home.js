@@ -1,5 +1,5 @@
 import React, { useState,useEffect ,} from 'react';
-import { View, Image, Modal, TouchableOpacity, Text, FlatList, ScrollView } from 'react-native';
+import { View, Image, Modal, TouchableOpacity, Text, FlatList, BackHandler, Alert } from 'react-native';
 import { Button, TextInput, Menu, Divider, Checkbox, RadioButton,Searchbar } from 'react-native-paper';
 import styles from '../styles/styles';
 import { useNavigation,useFocusEffect } from '@react-navigation/native';
@@ -7,8 +7,12 @@ import RecipeCard from '../card/RecipeCard';
 import BottomNav from '../card/BottomNav';
 import useRecipeHook from '../hooks/ReceipeHook';
 import { useRoute } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import FilterModal from './FilterModal';
+
+import { auth } from '../../Firebase/Firebase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 
   //Home + FAV https://api.spoonacular.com/recipes/complexSearch apply on this if some has value then after question mark add it
   //neutrians : https://api.spoonacular.com/recipes/findByIngredients ranks + ignorepantry
@@ -25,12 +29,44 @@ const Home = () => {
     const [filteredRecipes, setFilteredRecipes] = useState([]);
     const [suggestedRecipe, setSuggestedRecipe] =useState([]);
     const [suggested,setSuggested]= useState(false);
-    const [filterShow, setFilterShow] = useState(false);
     const route = useRoute();
     const navigation = useNavigation();
     const [modalVisible, setModalVisible] = useState(false);
       const [refreshing, setRefreshing] = useState(false); // State variable for refreshing
 
+        const handleLogout = async () => {
+    try {
+      // Get all keys from AsyncStorage
+      const keys = await AsyncStorage.getAllKeys();
+  
+      // Get all data corresponding to the keys
+      const data = await AsyncStorage.multiGet(keys);
+  
+      // Log all data
+      console.log("Data in AsyncStorage before deletion:");
+      data.forEach(([key, value]) => {
+        console.log(`${key}: ${value}`);
+      });
+  
+      // Clear all data from AsyncStorage
+      await AsyncStorage.clear();
+      console.log('Data Cleared', 'All data has been cleared.');
+      await auth.signOut();
+      console.log('User Logged Out', 'All data has been cleared.');
+  
+      
+      
+      // Navigate to the login screen or any other appropriate screen
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'LoginScreen' }],
+    }); // Replace 'LoginScreen' with the appropriate screen name
+    } catch (error) {
+      console.error('Error during data clearing:', error);
+    }
+  };
+
+  // handleLogout();
 
     const API_KEY = '2581b5abfc7c4fe6922f5e07b301f77f';
     let recipe= [];
@@ -129,9 +165,6 @@ const Home = () => {
 
      try {
         const response = await fetch(
-          searchQuery?
-          `https://api.spoonacular.com/recipes/complexSearch?includeIngredients=${searchQuery}&number=100&apiKey=${API_KEY}`
-            :
           `https://api.spoonacular.com/recipes/complexSearch?number=100&apiKey=${API_KEY}`
         );
         if (!response.ok) {
@@ -165,6 +198,30 @@ const Home = () => {
       console.log('Error fetching favorites:', error);
     }
   };
+
+
+      useEffect(() => {
+        const backAction = () => {
+            Alert.alert("Hold on!", "Are you sure you want to exit the app?", [
+                {
+                    text: "Cancel",
+                    onPress: () => null,
+                    style: "cancel"
+                },
+                { text: "YES", onPress: () => BackHandler.exitApp() }
+            ]);
+            return true;
+        };
+
+        const backHandler = BackHandler.addEventListener(
+            "hardwareBackPress",
+            backAction
+        );
+
+        return () => backHandler.remove();
+    }, []);
+
+
 
     const handleRecipeClick = async (item) => {
       console.log('I m here AT handleRecipeClick ');
@@ -231,6 +288,7 @@ const Home = () => {
   };
 
 
+  
    useFocusEffect(
     React.useCallback(() => {
       // Called when the screen gains focus
@@ -247,7 +305,6 @@ const Home = () => {
   );
 
   useEffect(() => {
-    // const searchUrl=  'https://api.spoonacular.com/recipes/complexSearch?includeIngredients='+searchQuery.toLowerCase();
     if (recipeData && recipeData.length > 0) {
       console.log('Recipe data is.... ', recipeData);
       const filtered = recipeData.filter(recipe =>
@@ -300,6 +357,16 @@ const onRefresh = () => {
   return (
     <View style={styles.container}>
       <View style={styles.mainView}>
+         <Button
+              mode="outlined"
+                      textColor="white"
+                      rippleColor="#FFDDB0"
+                      buttonColor="red"
+                      onPress={() => handleLogout()}
+                      style={{ borderColor: '#FDA738',width:110,marginBottom:10 }}
+            >
+              Logout
+            </Button>
           <TouchableOpacity
         activeOpacity={1} // Disable touch feedback
         onPress={() => onRefresh()} // Handle onPress event to trigger refresh
@@ -328,7 +395,7 @@ const onRefresh = () => {
 ) : (
   <></>
 )}
-            <FilterModal visible={modalVisible} onClose={() => setModalVisible(false)} applyFilter={setFilteredRecipes} suggestion={suggested} recipe_Data={setRecipeData} searchQuery={searchQuery} setFilterShow={setFilterShow}/>
+            <FilterModal visible={modalVisible} onClose={() => setModalVisible(false)} applyFilter={setFilteredRecipes} suggestion={suggested}/>
 
           </View>
         </View>

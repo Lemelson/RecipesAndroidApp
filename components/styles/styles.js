@@ -60,6 +60,22 @@ const styles = StyleSheet.create({
 },
 notFound:{
     textAlign:'center',justifyContent:'center',alignItems:'center', color: 'red', fontSize:18,fontFamily:'OpenSans_600SemiBold',marginTop:5 
-}
+},
+  text: {
+        fontSize: 16,
+        lineHeight: 21,
+        fontWeight: 'bold',
+        letterSpacing: 0.25,
+        color: 'white',
+      },
+       button: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 15,
+        paddingHorizontal: 52,
+        borderRadius: 20,
+        elevation: 3,
+        backgroundColor: '#252525',
+      },
 });
 export default styles;

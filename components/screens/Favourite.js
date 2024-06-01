@@ -5,6 +5,7 @@ import styles from '../styles/styles';
 import { useNavigation } from '@react-navigation/native';
 import RecipeCard from '../card/RecipeCard';
 import BottomNav from '../card/BottomNav';
+import { auth } from '../../Firebase/Firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
@@ -14,6 +15,38 @@ const Favourite = () => {
    const [searchQuery, setSearchQuery] = React.useState('');
      const [favorites, setFavorites] = React.useState([]);
 
+          const handleLogout = async () => {
+    try {
+      // Get all keys from AsyncStorage
+      const keys = await AsyncStorage.getAllKeys();
+  
+      // Get all data corresponding to the keys
+      const data = await AsyncStorage.multiGet(keys);
+  
+      // Log all data
+      console.log("Data in AsyncStorage before deletion:");
+      data.forEach(([key, value]) => {
+        console.log(`${key}: ${value}`);
+      });
+  
+      // Clear all data from AsyncStorage
+      await AsyncStorage.clear();
+      console.log('Data Cleared', 'All data has been cleared.');
+      await auth.signOut();
+      console.log('User Logged Out', 'All data has been cleared.');
+  
+      
+      
+      // Navigate to the login screen or any other appropriate screen
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'LoginScreen' }],
+    }); // Replace 'LoginScreen' with the appropriate screen name
+    } catch (error) {
+      console.error('Error during data clearing:', error);
+    }
+  };
+  
      const fetchFavorites = async () => {
   try {
     const favorites = await AsyncStorage.getItem('favorites');

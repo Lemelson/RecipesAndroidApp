@@ -8,7 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
-const FilterModal = ({ visible, onClose, applyFilter, suggestion,recipe_Data,searchQuery }) => {
+const FilterModal = ({ visible, onClose, applyFilter, suggestion }) => {
   const [cuisineOpen, setCuisineOpen] = useState(false);
   const [cuisineValue, setCuisineValue] = useState(null);
   const [cuisineItems, setCuisineItems] = useState([
@@ -71,7 +71,7 @@ const FilterModal = ({ visible, onClose, applyFilter, suggestion,recipe_Data,sea
     const filterData = {
       cuisine: cuisineValue,
       diet: dietValue,
-      includeIngredients: includeIngredientsValue || searchQuery,
+      includeIngredients: includeIngredientsValue,
       excludeIngredients: excludeIngredientsValue,
       maxReadyTime: maxReadyTimeValue,
       sort: sortValue,
@@ -90,7 +90,7 @@ const FilterModal = ({ visible, onClose, applyFilter, suggestion,recipe_Data,sea
         const ingredientNames = existingIngredientsArray.map(ingredient => ingredient.name).join(',+');
           console.log('ingrdients is ',ingredientNames)
           const apiKey = 'your_api_key'; // Replace 'your_api_key' with your actual API key
-          const url = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${ingredientNames}&number=100`;
+          const url = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${ingredientNames}`;
           console.log('url is ',url)
           apiUrl = url;
         }
@@ -106,7 +106,7 @@ const FilterModal = ({ visible, onClose, applyFilter, suggestion,recipe_Data,sea
 
     // Remove the trailing '&' from the apiUrl if it exists
     apiUrl = apiUrl.endsWith('&') ? apiUrl.slice(0, -1) : apiUrl;
-    apiUrl += '&apiKey=2581b5abfc7c4fe6922f5e07b301f77f&number=100';
+    apiUrl += '&apiKey=2581b5abfc7c4fe6922f5e07b301f77f';
     console.log(apiUrl);
 
     fetch(apiUrl)
@@ -117,13 +117,10 @@ const FilterModal = ({ visible, onClose, applyFilter, suggestion,recipe_Data,sea
         return response.json();
       })
       .then(data => {
-        if(suggestion){
+        if(suggestion)
           applyFilter(data)
-          recipe_Data(data)
-        }
         else
         applyFilter(data.results);
-        recipe_Data(data.results)
       })
       .catch(error => {
         console.error('There was a problem with your fetch operation:', error);

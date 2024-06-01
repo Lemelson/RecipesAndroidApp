@@ -5,6 +5,7 @@ import styles from '../styles/styles';
 import { useNavigation } from '@react-navigation/native';
 import RecipeCard from '../card/RecipeCard';
 import BottomNav from '../card/BottomNav';
+import { auth } from '../../Firebase/Firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRoute } from '@react-navigation/native';
 
@@ -17,6 +18,37 @@ const Tracking = () => {
 
       const { selectedItem } = route.params ;
 
+           const handleLogout = async () => {
+    try {
+      // Get all keys from AsyncStorage
+      const keys = await AsyncStorage.getAllKeys();
+  
+      // Get all data corresponding to the keys
+      const data = await AsyncStorage.multiGet(keys);
+  
+      // Log all data
+      console.log("Data in AsyncStorage before deletion:");
+      data.forEach(([key, value]) => {
+        console.log(`${key}: ${value}`);
+      });
+  
+      // Clear all data from AsyncStorage
+      await AsyncStorage.clear();
+      console.log('Data Cleared', 'All data has been cleared.');
+      await auth.signOut();
+      console.log('User Logged Out', 'All data has been cleared.');
+  
+      
+      
+      // Navigate to the login screen or any other appropriate screen
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'LoginScreen' }],
+    }); // Replace 'LoginScreen' with the appropriate screen name
+    } catch (error) {
+      console.error('Error during data clearing:', error);
+    }
+  };
 
    const Reset = () => {
         console.log('rest works')
@@ -75,6 +107,16 @@ const Tracking = () => {
   return (
     <View style={styles.container}>
       <View style={styles.mainView}>
+          <Button
+              mode="outlined"
+                      textColor="white"
+                      rippleColor="#FFDDB0"
+                      buttonColor="red"
+                      onPress={() => handleLogout()}
+                      style={{ borderColor: '#FDA738',width:110,marginBottom:10 }}
+            >
+              Logout
+            </Button>
         <View style={{ alignItems: 'center', justifyContent: 'center', flex: 0.05, marginBottom: 10 }}>
           <Text style={styles.recipeDetail}>Nutritional Tracking...</Text>
         </View>

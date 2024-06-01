@@ -3,7 +3,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { Provider as PaperProvider } from 'react-native-paper';
-
+import SignUp from './components/screens/Signup';
+import Login from './components/screens/Login';
 
 import {BigShouldersDisplay_400Regular, BigShouldersDisplay_900Black } from '@expo-google-fonts/big-shoulders-display';
 import { useFonts, LibreFranklin_300Light, LibreFranklin_400Regular, LibreFranklin_800ExtraBold,LibreFranklin_600SemiBold,LibreFranklin_500Medium } from '@expo-google-fonts/libre-franklin';
@@ -46,7 +47,12 @@ export default function App() {
     <PaperProvider>
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        
+
+        <Stack.Screen name="LoginScreen" component={Login} />
+
+        <Stack.Screen name="SignUp" component={SignUp} />
+
+
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="Tracking" component={Tracking} />
         <Stack.Screen name="Inventory" component={Inventory} />  
